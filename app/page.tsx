@@ -1,101 +1,95 @@
-import Image from "next/image";
+"use client"
+import React, { useState } from 'react';
+import axios from 'axios';
 
-export default function Home() {
+interface Format {
+  quality: string;
+  type: string;
+  mimeType: string;
+  itag: string;
+}
+
+export default function HomePage() {
+  const [videoUrl, setVideoUrl] = useState('');
+  const [formats, setFormats] = useState([]);
+  const [link, setLink] = useState<string>('');
+  const [videoInfo, setVideoInfo] = useState<any>(null);
+
+  const fetchVideoInfo = async () => {
+    try {
+      const response = await axios.post('/api/download', { url: link });
+      setVideoInfo(response.data);
+      // console.log(response)
+      setFormats(response?.data?.formats)
+    } catch (error) {
+      console.error('Error fetching video info:', error);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
+      <header className="bg-gray-800 p-4 text-white text-center w-full">
+        <h1 className="text-2xl md:text-3xl font-bold">Instatube Downloader</h1>
+        <p className="text-sm mt-2">Download Instagram and YouTube videos easily by pasting the link</p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <section className="flex-grow flex items-center justify-center bg-gradient-to-r from-pink-400 to-purple-500 py-10 px-4 md:px-10 w-full">
+        <div className="text-center text-white p-6 md:p-10 max-w-xl w-full">
+          <h2 className="text-2xl md:text-4xl font-semibold mb-4">Download Your Favorite Videos</h2>
+
+          <input
+            type="text"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="Enter YouTube video link"
+            className="p-2 rounded w-full mb-4"
+          />
+
+          <button
+            className="p-2 bg-blue-500 text-white rounded w-full md:w-auto"
+            onClick={fetchVideoInfo}
+            disabled={!link}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Get Video Info
+          </button>
+
+          {/* Display video info and format options */}
+          {videoInfo && (
+            <div className="mt-6 text-left">
+              <h3 className="text-lg font-semibold">{videoInfo.title}</h3>
+              <img src={videoInfo.thumbnail} alt="Video Thumbnail" className="mb-4" />
+
+              <h4 className="font-medium">Select Format:</h4>
+              <select
+                // onChange={(e) => setSelectedFormat(e.target.value)}
+                className="p-2 rounded w-full mb-4"
+              >
+                <option value="">Choose a format</option>
+                {videoInfo.formats.map((format: Format) => (
+                  <option key={format.itag} value={format.itag}>
+                    {format.quality} - {format.type}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                className="p-2 bg-green-500 text-white rounded w-full md:w-auto"
+                // onClick={handleDownload}
+              >
+                Download
+              </button>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      <footer className="bg-gray-800 p-4 text-white text-center w-full">
+        <p>&copy; 2024 Instatube Downloader. All rights reserved.</p>
       </footer>
     </div>
+
+
+   
+
   );
 }
